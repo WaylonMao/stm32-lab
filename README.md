@@ -4,9 +4,11 @@ This repository contains the source code and documentation for my STM32 developm
 learning purposes and is based on the STM32F103ZET6 microcontroller board, which is manufactured by ALIENTEK tech. co.,
 LTD. (Zhengdian atom).
 
+![Board](https://raw.githubusercontent.com/WaylonMao/stm32-lab/master/DevelopmentBoard.jpeg)
+
 ## Branch: Master
 
-All labs will be updated in sub-branches. 
+All labs will be updated in sub-branches.
 
 - 1-blink-leds
 - 2-key-input
