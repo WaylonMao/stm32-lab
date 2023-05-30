@@ -1,6 +1,6 @@
 /* USER CODE BEGIN Header */
 /**
- * @name           : 1-blink-led
+ * @name           : 2-key-input
  ******************************************************************************
  * @file           : main.c
  * @brief          : This is my project for learning STM32 development.
@@ -32,6 +32,16 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define LED0_PIN GPIO_PIN_5
+#define LED0_PORT GPIOB
+#define LED1_PIN GPIO_PIN_5
+#define LED1_PORT GPIOE
+#define KEY0_PIN GPIO_PIN_4
+#define KEY0_PORT GPIOE
+#define KEY1_PIN GPIO_PIN_3
+#define KEY1_PORT GPIOE
+#define KEY_UP_PIN GPIO_PIN_0
+#define KEY_UP_PORT GPIOA
 
 /* USER CODE END PD */
 
@@ -50,7 +60,7 @@
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-
+void key_led(GPIO_TypeDef *, uint16_t, GPIO_TypeDef *, uint16_t, uint8_t);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -93,15 +103,10 @@ int main(void) {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    /*
-     * This loop will turn on the two LEDs in turn.
-     */
-    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
-    HAL_Delay(500);
-    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
-    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_5);
-    HAL_Delay(500);
-    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_5);
+    key_led(KEY0_PORT, KEY0_PIN, LED0_PORT, LED0_PIN, GPIO_PIN_RESET);
+    key_led(KEY1_PORT, KEY1_PIN, LED1_PORT, LED1_PIN, GPIO_PIN_RESET);
+    key_led(KEY_UP_PORT, KEY_UP_PIN, LED0_PORT, LED0_PIN, GPIO_PIN_SET);
+    HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -160,27 +165,78 @@ static void MX_GPIO_Init(void) {
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /**
+   * Initialize the LED ports.
+   */
   /*
    * There are two LEDs on PB5 and PE5, both negative poles are connected to GPIO pins,
    * and their positive poles are pulled up to 3.3V
    */
   GPIO_InitTypeDef gpio_init_struct;
-  gpio_init_struct.Pin = GPIO_PIN_5;
+  gpio_init_struct.Pin = LED0_PIN; /* LED0 and LED1 both are PIN_5 */
   gpio_init_struct.Mode = GPIO_MODE_OUTPUT_PP;
   gpio_init_struct.Pull = GPIO_PULLUP;
   gpio_init_struct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &gpio_init_struct);
-  HAL_GPIO_Init(GPIOE, &gpio_init_struct);
+  HAL_GPIO_Init(LED0_PORT, &gpio_init_struct);
+  HAL_GPIO_Init(LED1_PORT, &gpio_init_struct);
+
+  /**
+    * Initialize the KEY ports.
+    */
   /*
+   * There are 3 keys on KEY_UP(PA0), KEY_1(PE3), KEY_0(PE4). The KEY_UP is connected to high level (3.3 V),
+   * KEY_0 and KEY_1 are connected to low level (GND).
+   *
+   * So Set KEY_UP pull down, KEY_0 and KEY_1 are pulled up.
+   * And KEY_0 and KEY_1 are connected to the same GPIO port, so they can be initialized together.
+   */
+  gpio_init_struct.Pin = KEY0_PIN | KEY1_PIN;
+  gpio_init_struct.Mode = GPIO_MODE_INPUT;
+  /*
+   * These two members are not changed, so no need to set again.
+   * gpio_init_struct.Pull = GPIO_PULLUP;
+   * gpio_init_struct.Speed = GPIO_SPEED_FREQ_LOW;
+   */
+  HAL_GPIO_Init(KEY0_PORT, &gpio_init_struct);
+
+  gpio_init_struct.Pin = KEY_UP_PIN;
+  gpio_init_struct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(KEY_UP_PORT, &gpio_init_struct);
+
+  /**
    * Set the initial level of the two LEDs to high level,
    * so that the two LEDs are off at the beginning.
    */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED0_PORT, LED0_PIN, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED1_PORT, LED1_PIN, GPIO_PIN_SET);
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+/**
+ * @brief Key and LED control function
+ * @param buttonPort GPIO port of the button
+ * @param buttonPin GPIO pin of the button
+ * @param ledPort GPIO port of the LED
+ * @param ledPin GPIO pin of the LED
+ * @param pressLevel The level of the button when pressed
+ * @retval None
+ */
+void key_led(GPIO_TypeDef *buttonPort,
+             uint16_t buttonPin,
+             GPIO_TypeDef *ledPort,
+             uint16_t ledPin,
+             uint8_t pressLevel) {
+  if (HAL_GPIO_ReadPin(buttonPort, buttonPin) == pressLevel) {
+    HAL_Delay(10); /* Debounce */
+    if (HAL_GPIO_ReadPin(buttonPort, buttonPin) == pressLevel) {
+      HAL_GPIO_TogglePin(ledPort, ledPin);
+      do {
+        HAL_Delay(10);
+      } while (HAL_GPIO_ReadPin(buttonPort, buttonPin) == pressLevel);
+    }
+  }
+}
 
 /* USER CODE END 4 */
 
