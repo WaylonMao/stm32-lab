@@ -12,6 +12,8 @@ KEY_0 and KEY_1 are connected to low level (GND).
 
 This project can use the keys to control the LEDs. KEY_0 and KEY_UP can control LED0, KEY_1 can control LED1.
 
+> Update (2023-05-30): Wrote a LED driver(led.h) for this board.
+
 ## Learning:
 
 - GPIO Input
@@ -20,9 +22,9 @@ This project can use the keys to control the LEDs. KEY_0 and KEY_UP can control 
 
 ## Date and Version
 
-Date: 2022-05-29
+Date: 2022-05-30
 
-Version: 0.1
+Version: 0.2
 
 ## Tools and Dependencies
 
