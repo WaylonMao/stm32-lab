@@ -12,8 +12,8 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2022-05-29
- * @version        : 0.1
+ * @date           : 2022-05-30
+ * @version        : 0.2
  ******************************************************************************
  */
 /* USER CODE END Header */
@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "./LED_Driver/led.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -87,7 +87,7 @@ int main(void) {
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-
+  led_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -96,12 +96,12 @@ int main(void) {
     /*
      * This loop will turn on the two LEDs in turn.
      */
-    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
+    LED0_TOGGLE();
     HAL_Delay(500);
-    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
-    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_5);
+    LED1_TOGGLE();
+    LED0_TOGGLE();
     HAL_Delay(500);
-    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_5);
+    LED1_TOGGLE();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -160,23 +160,7 @@ static void MX_GPIO_Init(void) {
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-  /*
-   * There are two LEDs on PB5 and PE5, both negative poles are connected to GPIO pins,
-   * and their positive poles are pulled up to 3.3V
-   */
-  GPIO_InitTypeDef gpio_init_struct;
-  gpio_init_struct.Pin = GPIO_PIN_5;
-  gpio_init_struct.Mode = GPIO_MODE_OUTPUT_PP;
-  gpio_init_struct.Pull = GPIO_PULLUP;
-  gpio_init_struct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &gpio_init_struct);
-  HAL_GPIO_Init(GPIOE, &gpio_init_struct);
-  /*
-   * Set the initial level of the two LEDs to high level,
-   * so that the two LEDs are off at the beginning.
-   */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_SET);
+
   /* USER CODE END MX_GPIO_Init_2 */
 }
 

@@ -9,6 +9,8 @@ LTD. (Zhengdian atom).
 This branch contains the source code for the first lab of the project. The goal of this lab is to blink the LEDs on the
 board.
 
+> Update (2023-05-30): Wrote a LED driver(led.h) for this board.
+
 ## Learning:
 
 - System clock configuration and initialization
@@ -17,9 +19,9 @@ board.
 
 ## Date and Version
 
-Date: 2022-05-29
+Date: 2022-05-30
 
-Version: 0.1
+Version: 0.2
 
 ## Tools and Dependencies
 
