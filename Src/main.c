@@ -1,6 +1,6 @@
 /* USER CODE BEGIN Header */
 /**
- * @name           : 2-key-input
+ * @name           : 3-external-interrupt
  ******************************************************************************
  * @file           : main.c
  * @brief          : This is my project for learning STM32 development.
@@ -12,7 +12,7 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2022-05-29
+ * @date           : 2022-05-30
  * @version        : 0.1
  ******************************************************************************
  */
@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "./LED_Driver/led.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,10 +32,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define LED0_PIN GPIO_PIN_5
-#define LED0_PORT GPIOB
-#define LED1_PIN GPIO_PIN_5
-#define LED1_PORT GPIOE
 #define KEY0_PIN GPIO_PIN_4
 #define KEY0_PORT GPIOE
 #define KEY1_PIN GPIO_PIN_3
@@ -60,7 +56,7 @@
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-void key_led(GPIO_TypeDef *, uint16_t, GPIO_TypeDef *, uint16_t, uint8_t);
+void exti_init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -97,16 +93,17 @@ int main(void) {
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-
+  led_init();
+  exti_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    key_led(KEY0_PORT, KEY0_PIN, LED0_PORT, LED0_PIN, GPIO_PIN_RESET);
-    key_led(KEY1_PORT, KEY1_PIN, LED1_PORT, LED1_PIN, GPIO_PIN_RESET);
-    key_led(KEY_UP_PORT, KEY_UP_PIN, LED0_PORT, LED0_PIN, GPIO_PIN_SET);
-    HAL_Delay(10);
+    LED0_TOGGLE();
+    LED1_TOGGLE();
+    HAL_Delay(500);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -156,88 +153,45 @@ void SystemClock_Config(void) {
  */
 static void MX_GPIO_Init(void) {
   /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
   /* USER CODE END MX_GPIO_Init_1 */
 
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-  /**
-   * Initialize the LED ports.
-   */
-  /*
-   * There are two LEDs on PB5 and PE5, both negative poles are connected to GPIO pins,
-   * and their positive poles are pulled up to 3.3V
-   */
-  GPIO_InitTypeDef gpio_init_struct;
-  gpio_init_struct.Pin = LED0_PIN; /* LED0 and LED1 both are PIN_5 */
-  gpio_init_struct.Mode = GPIO_MODE_OUTPUT_PP;
-  gpio_init_struct.Pull = GPIO_PULLUP;
-  gpio_init_struct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED0_PORT, &gpio_init_struct);
-  HAL_GPIO_Init(LED1_PORT, &gpio_init_struct);
 
-  /**
-    * Initialize the KEY ports.
-    */
-  /*
-   * There are 3 keys on KEY_UP(PA0), KEY_1(PE3), KEY_0(PE4). The KEY_UP is connected to high level (3.3 V),
-   * KEY_0 and KEY_1 are connected to low level (GND).
-   *
-   * So Set KEY_UP pull down, KEY_0 and KEY_1 are pulled up.
-   * And KEY_0 and KEY_1 are connected to the same GPIO port, so they can be initialized together.
-   */
-  gpio_init_struct.Pin = KEY0_PIN | KEY1_PIN;
-  gpio_init_struct.Mode = GPIO_MODE_INPUT;
-  /*
-   * These two members are not changed, so no need to set again.
-   * gpio_init_struct.Pull = GPIO_PULLUP;
-   * gpio_init_struct.Speed = GPIO_SPEED_FREQ_LOW;
-   */
-  HAL_GPIO_Init(KEY0_PORT, &gpio_init_struct);
-
-  gpio_init_struct.Pin = KEY_UP_PIN;
-  gpio_init_struct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(KEY_UP_PORT, &gpio_init_struct);
-
-  /**
-   * Set the initial level of the two LEDs to high level,
-   * so that the two LEDs are off at the beginning.
-   */
-  HAL_GPIO_WritePin(LED0_PORT, LED0_PIN, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(LED1_PORT, LED1_PIN, GPIO_PIN_SET);
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
-/**
- * @brief Key and LED control function
- * @param buttonPort GPIO port of the button
- * @param buttonPin GPIO pin of the button
- * @param ledPort GPIO port of the LED
- * @param ledPin GPIO pin of the LED
- * @param pressLevel The level of the button when pressed
- * @retval None
- */
-void key_led(GPIO_TypeDef *buttonPort,
-             uint16_t buttonPin,
-             GPIO_TypeDef *ledPort,
-             uint16_t ledPin,
-             uint8_t pressLevel) {
-  if (HAL_GPIO_ReadPin(buttonPort, buttonPin) == pressLevel) {
-    HAL_Delay(10); /* Debounce */
-    if (HAL_GPIO_ReadPin(buttonPort, buttonPin) == pressLevel) {
-      HAL_GPIO_TogglePin(ledPort, ledPin);
-      do {
-        HAL_Delay(10);
-      } while (HAL_GPIO_ReadPin(buttonPort, buttonPin) == pressLevel);
+void exti_init(void) {
+  GPIO_InitTypeDef gpio_init_struct;
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+
+  gpio_init_struct.Pin = KEY0_PIN;
+  gpio_init_struct.Mode = GPIO_MODE_IT_FALLING;
+  gpio_init_struct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(KEY0_PORT, &gpio_init_struct);
+
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+}
+
+void EXTI4_IRQHandler(void) {
+  HAL_GPIO_EXTI_IRQHandler(KEY0_PIN);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  /* HAL_Delay will not work here, unless set up the priority of SysTick higher than EXTI4's. */
+  for (uint32_t i = 0; i < 100000; i++); /* Debounce */
+  if (GPIO_Pin == KEY0_PIN) {
+    if (HAL_GPIO_ReadPin(KEY0_PORT, KEY0_PIN) == GPIO_PIN_RESET) {
+      LED0_TOGGLE();
     }
   }
 }
-
 /* USER CODE END 4 */
 
 /**
