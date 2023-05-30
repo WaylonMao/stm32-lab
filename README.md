@@ -4,6 +4,23 @@ This repository contains the source code and documentation for my STM32 developm
 learning purposes and is based on the STM32F103ZET6 microcontroller board, which is manufactured by ALIENTEK tech. co.,
 LTD. (Zhengdian atom).
 
+## Branch: 1-blink-leds
+
+This branch contains the source code for the first lab of the project. The goal of this lab is to blink the LEDs on the
+board.
+
+## Learning:
+
+- System clock configuration and initialization
+- GPIO configuration and initialization
+- Delay function
+
+## Date and Version
+
+Date: 2022-05-29
+
+Version: 0.1
+
 ## Tools and Dependencies
 
 To build and program the project, the following tools and dependencies are required:
@@ -41,11 +58,6 @@ To get started with this project, follow the steps below:
 ## Author
 
 [Weilong Mao](https://github.com/WaylonMao)
-
-## Date and Version
-
-Date: 2022-05-29
-Version: prj_led_0.1
 
 ## License
 

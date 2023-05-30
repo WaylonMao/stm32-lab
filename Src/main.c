@@ -1,5 +1,6 @@
 /* USER CODE BEGIN Header */
 /**
+ * @name           : 1-blink-led
  ******************************************************************************
  * @file           : main.c
  * @brief          : This is my project for learning STM32 development.
@@ -12,7 +13,7 @@
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
  * @date           : 2022-05-29
- * @version        : prj_led_0.1
+ * @version        : 0.1
  ******************************************************************************
  */
 /* USER CODE END Header */
