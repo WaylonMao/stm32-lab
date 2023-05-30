@@ -1,0 +1,26 @@
+# Ignore build output directories
+build/
+bin/
+cmake-build-debug/
+
+# Ignore IDE files
+.idea/
+.cproject
+.settings/
+*.iml
+*.ipr
+*.iws
+
+# Ignore object and library files
+*.o
+*.a
+*.lib
+
+# Ignore user-specific files
+*.swp
+*.swo
+*~
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
