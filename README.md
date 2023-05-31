@@ -4,13 +4,18 @@ This repository contains the source code and documentation for my STM32 developm
 learning purposes and is based on the STM32F103ZET6 microcontroller board, which is manufactured by ALIENTEK tech. co.,
 LTD. (Zhengdian atom).
 
-## Branch: 4-clock-init
+## Branch: 5-UART-demo
 
-This sys library is written for the initial clock configuration of this development board.
+This project uses UART for single byte transit and receive communication. Learned UART initialization, configuration and
+basic usage.
+
+![UART](https://raw.githubusercontent.com/WaylonMao/stm32-lab/5-UART-demo/UART.png)
 
 ## Learning:
 
-- Clock Configuration
+- UART initialization
+- UART configuration
+- UART RX/TX
 
 ## Date and Version
 
