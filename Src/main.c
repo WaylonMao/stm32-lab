@@ -1,6 +1,6 @@
 /* USER CODE BEGIN Header */
 /**
- * @name           : 3-external-interrupt
+ * @name           : 4-clock-init
  ******************************************************************************
  * @file           : main.c
  * @brief          : This is my project for learning STM32 development.
@@ -12,7 +12,7 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2022-05-30
+ * @date           : 2022-05-31
  * @version        : 0.1
  ******************************************************************************
  */

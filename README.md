@@ -4,26 +4,17 @@ This repository contains the source code and documentation for my STM32 developm
 learning purposes and is based on the STM32F103ZET6 microcontroller board, which is manufactured by ALIENTEK tech. co.,
 LTD. (Zhengdian atom).
 
-## Branch: 3-external-interrupt
+## Branch: 4-clock-init
 
-There are two LEDs, LED_0(PB5) and LED_1(PE5), both negative poles are connected to GPIO pins, and their positive poles
-are pulled
-up to 3.3V. And 3 keys on KEY_UP(PA0), KEY_1(PE3), KEY_0(PE4). The KEY_UP is connected to high level (3.3 V),
-KEY_0 and KEY_1 are connected to low level (GND).
-
-This project is designed to learn how to use external interrupt. LED_0 and LED_1 are blinking in main loop.
-After KEY_0 is pressed, the LED on PB5 will be toggled. This is implemented by external interrupt.
+This sys library is written for the initial clock configuration of this development board.
 
 ## Learning:
 
-- GPIO Input
-- GPIO Output
-- External Interrupt
-- NVIC Priority
+- Clock Configuration
 
 ## Date and Version
 
-Date: 2022-05-30
+Date: 2022-05-31
 
 Version: 0.1
 
