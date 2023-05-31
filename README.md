@@ -10,9 +10,11 @@ LTD. (Zhengdian atom).
 
 All labs will be updated in sub-branches.
 
-- 1-blink-leds
-- 2-key-input
-- 3-external-interrupt
+- [1-blink-leds](https://github.com/WaylonMao/stm32-lab/tree/1-blink-leds)
+- [2-key-input](https://github.com/WaylonMao/stm32-lab/tree/2-key-input)
+- [3-external-interrupt](https://github.com/WaylonMao/stm32-lab/tree/3-external-interrupt)
+- [4-clock-init](https://github.com/WaylonMao/stm32-lab/tree/4-clock-init)
+- [5-UART-demo](https://github.com/WaylonMao/stm32-lab/tree/5-UART-demo)
 - learning......
 
 ## Tools and Dependencies
@@ -55,7 +57,7 @@ To get started with this project, follow the steps below:
 
 ## Date
 
-Date: 2022-05-29
+Update Date: 2022-05-31
 
 ## License
 
