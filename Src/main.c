@@ -12,8 +12,8 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2022-05-31
- * @version        : 0.1
+ * @date           : 2022-06-05
+ * @version        : 0.2
  ******************************************************************************
  */
 /* USER CODE END Header */
@@ -22,9 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "stdio.h"
 #include "./SYSTEM/sys.h"
 #include "./LED_Driver/led.h"
+#include "./SYSTEM/usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,17 +47,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-UART_HandleTypeDef g_uart1_handle;
-uint8_t g_rx_buffer[1];
-uint8_t g_uart1_rx_state = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 void key_init(void);
-void uart_init(uint32_t);
-void HAL_UART_MspInit(UART_HandleTypeDef *);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -71,6 +67,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *);
  */
 int main(void) {
   /* USER CODE BEGIN 1 */
+  uint8_t len;
 
   /* USER CODE END 1 */
 
@@ -96,21 +93,20 @@ int main(void) {
   /* USER CODE BEGIN 2 */
   led_init();
   key_init();
-  uart_init(115200);
+  usart_init(115200);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    if (g_uart1_rx_state == 1) {
-      /* Method 1*/
-      printf("Your message: %s\r\n", g_rx_buffer);
-      /* Method 2*/
-      HAL_UART_Transmit(&g_uart1_handle, g_rx_buffer, 1, 1000);
-
+    if (g_usart_rx_state & 0x8000) {
+      len = g_usart_rx_state & 0x3fff;
+      printf("Your input:\r\n");
+      HAL_UART_Transmit(&g_uart1_handle, g_usart_rx_buf, len, 1000);
+      printf("\r\n");
       while (__HAL_UART_GET_FLAG(&g_uart1_handle, UART_FLAG_TC) != 1);
       printf("\r\n");
-      g_uart1_rx_state = 0;
+      g_usart_rx_state = 0;
     }
     if (HAL_GPIO_ReadPin(KEY0_PORT, KEY0_PIN) == GPIO_PIN_RESET) {
       HAL_Delay(10);
@@ -156,72 +152,6 @@ void key_init(void) {
   gpio_init_struct.Mode = GPIO_MODE_INPUT;
   gpio_init_struct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(KEY0_PORT, &gpio_init_struct);
-}
-
-void uart_init(uint32_t baudrate) {
-  /* UART initialization settings */
-  g_uart1_handle.Instance = USART1;
-  g_uart1_handle.Init.BaudRate = baudrate;              /* Baud rate */
-  g_uart1_handle.Init.WordLength = UART_WORDLENGTH_8B;  /* 8-bit data format */
-  g_uart1_handle.Init.StopBits = UART_STOPBITS_1;       /* 1 stop bit */
-  g_uart1_handle.Init.Parity = UART_PARITY_NONE;        /* No parity bit */
-  g_uart1_handle.Init.HwFlowCtl = UART_HWCONTROL_NONE;  /* No hardware flow control */
-  g_uart1_handle.Init.Mode = UART_MODE_TX_RX;           /* Transmit and receive mode */
-  HAL_UART_Init(&g_uart1_handle);                 /* HAL_UART_Init() will enable UART1 */
-
-  HAL_UART_Receive_IT(&g_uart1_handle, g_rx_buffer, 1);
-}
-
-void HAL_UART_MspInit(UART_HandleTypeDef *huart) {
-  GPIO_InitTypeDef gpio_init_struct;
-  if (huart->Instance == USART1) {
-    __HAL_RCC_USART1_CLK_ENABLE();
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-
-    gpio_init_struct.Pin = GPIO_PIN_9;                        /* TX Pin */
-    gpio_init_struct.Mode = GPIO_MODE_AF_PP;
-    gpio_init_struct.Speed = GPIO_SPEED_FREQ_HIGH;            /* IO speed set to high speed */
-    HAL_GPIO_Init(GPIOA, &gpio_init_struct);
-
-    gpio_init_struct.Pin = GPIO_PIN_10;                        /* RX Pin */
-    gpio_init_struct.Pull = GPIO_PULLUP;
-    gpio_init_struct.Mode = GPIO_MODE_AF_INPUT;
-    HAL_GPIO_Init(GPIOA, &gpio_init_struct);
-
-    HAL_NVIC_SetPriority(USART1_IRQn, 3, 3);
-    HAL_NVIC_EnableIRQ(USART1_IRQn);
-  }
-}
-
-void USART1_IRQHandler(void) {
-  HAL_UART_IRQHandler(&g_uart1_handle);
-  HAL_UART_Receive_IT(&g_uart1_handle, g_rx_buffer, 1);
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  g_uart1_rx_state = 1;
-
-}
-
-/* For MDK, redefine the fputc function, and the printf function will eventually
- * call fputc to output strings to the serial port
- */
-
-int fputc(int ch, FILE *f) {
-  while ((USART1->SR & 0X40) == 0); /* Wait for the previous character to be sent */
-  USART1->DR = (uint8_t) ch; /* Write the character ch to the DR register for sending */
-  return ch;
-}
-/*
- * For STM32CubeMX project, redefine the _write function, and the printf function will eventually
- * call _write to output strings to the serial port
- */
-int _write(int file, char *ptr, int len) {
-  for (int idx = 0; idx < len; idx++) {
-    while ((USART1->SR & 0X40) == 0);
-    USART1->DR = (uint8_t) ptr[idx];
-  }
-  return len;
 }
 /* USER CODE END 4 */
 

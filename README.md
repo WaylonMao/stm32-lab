@@ -11,6 +11,8 @@ basic usage.
 
 ![UART](https://raw.githubusercontent.com/WaylonMao/stm32-lab/5-UART-demo/UART.png)
 
+> Update (2023-06-05): Wrote a USART driver(usart.h) for this board.
+
 ## Learning:
 
 - UART initialization
@@ -19,9 +21,9 @@ basic usage.
 
 ## Date and Version
 
-Date: 2022-05-31
+Date: 2022-06-05
 
-Version: 0.1
+Version: 0.2
 
 ## Tools and Dependencies
 
