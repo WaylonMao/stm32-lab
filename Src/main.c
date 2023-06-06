@@ -12,8 +12,8 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2022-06-05
- * @version        : 0.2
+ * @date           : 2022-06-06
+ * @version        : 0.3
  ******************************************************************************
  */
 /* USER CODE END Header */
@@ -98,13 +98,29 @@ int main(void) {
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  printf("Input 1 to turn on the LED, 0 to turn off the LED.\r\n");
   while (1) {
     if (g_usart_rx_state & 0x8000) {
       len = g_usart_rx_state & 0x3fff;
       printf("Your input:\r\n");
       HAL_UART_Transmit(&g_uart1_handle, g_usart_rx_buf, len, 1000);
       printf("\r\n");
-      while (__HAL_UART_GET_FLAG(&g_uart1_handle, UART_FLAG_TC) != 1);
+      switch (g_usart_rx_buf[0]) {
+      case '1':
+        printf("LED0 ON\r\n");
+        LED0(0);
+        break;
+      case '0':
+        printf("LED0 OFF\r\n");
+        LED0(1);
+        break;
+      default:
+        printf("Input error!\r\n");
+        break;
+      }
+
+      while (__HAL_UART_GET_FLAG(&g_uart1_handle, UART_FLAG_TC) != 1)
+        ;
       printf("\r\n");
       g_usart_rx_state = 0;
     }
@@ -184,3 +200,4 @@ void assert_failed(uint8_t *file, uint32_t line) {
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+

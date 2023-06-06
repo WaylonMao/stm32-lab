@@ -12,6 +12,8 @@ basic usage.
 ![UART](https://raw.githubusercontent.com/WaylonMao/stm32-lab/5-UART-demo/UART.png)
 
 > Update (2023-06-05): Wrote a USART driver(usart.h) for this board.
+>
+> Update (2023-06-06): Control the LED according to the first character of the received message.
 
 ## Learning:
 
@@ -21,9 +23,9 @@ basic usage.
 
 ## Date and Version
 
-Date: 2022-06-05
+Date: 2022-06-06
 
-Version: 0.2
+Version: 0.3
 
 ## Tools and Dependencies
 
