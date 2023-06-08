@@ -12,7 +12,7 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2022-05-29
+ * @date           : 2023-05-29
  * @version        : 0.1
  ******************************************************************************
  */
