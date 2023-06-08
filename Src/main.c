@@ -12,13 +12,14 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2023-05-30
- * @version        : 0.2
+ * @date           : 2023-06-08
+ * @version        : 0.3
  ******************************************************************************
  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <math.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -32,7 +33,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define PI 3.1415926
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -64,7 +65,11 @@ static void MX_GPIO_Init(void);
  */
 int main(void) {
   /* USER CODE BEGIN 1 */
-
+  uint8_t num_steps = 100;
+  uint8_t cycle_time = 20; // 20ms
+  float angle = 0.0;
+  uint8_t low_duration = 0;
+  uint8_t high_duration = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -74,7 +79,7 @@ int main(void) {
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  led_init();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -92,16 +97,19 @@ int main(void) {
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  LED0(1);
   while (1) {
-    /*
-     * This loop will turn on the two LEDs in turn.
-     */
-    LED0_TOGGLE();
-    HAL_Delay(500);
-    LED1_TOGGLE();
-    LED0_TOGGLE();
-    HAL_Delay(500);
-    LED1_TOGGLE();
+
+    for (angle = 0; angle <= PI; angle += PI / num_steps) {
+      low_duration = (uint8_t)(sin(angle) * cycle_time);
+      high_duration = cycle_time - low_duration;
+      LED0(0);
+      LED1(0);
+      HAL_Delay(high_duration);
+      LED0(1);
+      LED1(1);
+      HAL_Delay(low_duration);
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -133,7 +141,8 @@ void SystemClock_Config(void) {
 
   /** Initializes the CPU, AHB and APB buses clocks
    */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
+                                RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;

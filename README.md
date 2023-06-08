@@ -10,6 +10,8 @@ This branch contains the source code for the first lab of the project. The goal 
 board.
 
 > Update (2023-05-30): Wrote a LED driver(led.h) for this board.
+>
+> Update (2023-06-08): Breathing LED effect.
 
 ## Learning:
 
@@ -19,9 +21,9 @@ board.
 
 ## Date and Version
 
-Date: 2023-05-30
+Date: 2023-06-08
 
-Version: 0.2
+Version: 0.3
 
 ## Tools and Dependencies
 
