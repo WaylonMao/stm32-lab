@@ -11,8 +11,8 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2022-05-29
- * @version        : prj_led_0.1
+ * @date           : 2023-06-08
+ * @version        : 0.2
  ******************************************************************************
  */
 /* USER CODE END Header */
