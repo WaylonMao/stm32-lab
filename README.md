@@ -23,7 +23,7 @@ After KEY_0 is pressed, the LED on PB5 will be toggled. This is implemented by e
 
 ## Date and Version
 
-Date: 2022-05-30
+Date: 2023-05-30
 
 Version: 0.1
 
