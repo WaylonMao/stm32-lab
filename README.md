@@ -4,18 +4,20 @@ This repository contains the source code and documentation for my STM32 developm
 learning purposes and is based on the STM32F103ZET6 microcontroller board, which is manufactured by ALIENTEK tech. co.,
 LTD. (Zhengdian atom).
 
-![Board](https://raw.githubusercontent.com/WaylonMao/stm32-lab/master/DevelopmentBoard.jpeg)
+## Branch: 6-timer-delay
 
-## Branch: Master
+This project uses the timer to implement millisecond and microsecond delays.
 
-All labs will be updated in sub-branches.
+## Learning:
 
-- [1-blink-leds](https://github.com/WaylonMao/stm32-lab/tree/1-blink-leds)
-- [2-key-input](https://github.com/WaylonMao/stm32-lab/tree/2-key-input)
-- [3-external-interrupt](https://github.com/WaylonMao/stm32-lab/tree/3-external-interrupt)
-- [4-clock-init](https://github.com/WaylonMao/stm32-lab/tree/4-clock-init)
-- [5-UART-demo](https://github.com/WaylonMao/stm32-lab/tree/5-UART-demo)
-- learning......
+- Timer Initialization
+- Counter
+
+## Date and Version
+
+Date: 2023-06-09
+
+Version: 0.1
 
 ## Tools and Dependencies
 
@@ -54,10 +56,6 @@ To get started with this project, follow the steps below:
 ## Author
 
 [Weilong Mao](https://github.com/WaylonMao)
-
-## Date
-
-Update Date: 2023-06-08
 
 ## License
 
