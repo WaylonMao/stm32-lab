@@ -4,14 +4,14 @@ This repository contains the source code and documentation for my STM32 developm
 learning purposes and is based on the STM32F103ZET6 microcontroller board, which is manufactured by ALIENTEK tech. co.,
 LTD. (Zhengdian atom).
 
-## Branch: 7-timer-interrupt
+## Branch: 8-timer-pwm
 
-This project uses Timer to generate interrupt every 1 second. The LED on the board will blink every 1 second.
+This project uses Timer to generate PWM signals. The PWM signals are used to control the blinking of the LED on the board. 
 
 ## Learning:
 
 - Timer Initialization
-- Interrupt
+- PWM
 
 ## Date and Version
 
