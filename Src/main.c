@@ -1,6 +1,6 @@
 /* USER CODE BEGIN Header */
 /**
- * @name           : 6-timer-delay
+ * @name           : 7-timer-interrupt
  ******************************************************************************
  * @file           : main.c
  * @brief          : This is my project for learning STM32 development.
@@ -12,7 +12,7 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2023-06-09
+ * @date           : 2023-06-11
  * @version        : 0.1
  ******************************************************************************
  */
@@ -56,8 +56,7 @@ static void MX_GPIO_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-void delay_10ms(uint32_t);
-void delay_us(uint32_t);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -97,14 +96,15 @@ int main(void) {
   MX_TIM3_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_TIM_Base_Start_IT(&htim3);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
     LED1_TOGGLE();
-    delay_10ms(100);
+    HAL_Delay(1000);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -169,9 +169,9 @@ static void MX_TIM3_Init(void) {
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 71;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_DOWN;
-  htim3.Init.Period = 1;
+  htim3.Init.Prescaler = 7199;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 9999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK) {
@@ -270,25 +270,10 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
-void delay_10ms(uint32_t ms) {
-  uint32_t i;
-  for (i = 0; i < ms; i++) {
-    delay_us(10000);
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+  if (htim->Instance == TIM3) {
+    LED0_TOGGLE();
   }
-}
-
-void delay_us(uint32_t us) {
-  uint16_t counter = us & 0xffff;
-  /* Set the initial value of the counter */
-  __HAL_TIM_SET_COUNTER(&htim3, counter);
-  /* Start the timer */
-  HAL_TIM_Base_Start(&htim3);
-  /* Wait for the timer to reach the set value */
-  while (counter > 0) {
-    counter = __HAL_TIM_GET_COUNTER(&htim3);
-  }
-  /* Stop the timer */
-  HAL_TIM_Base_Stop(&htim3);
 }
 /* USER CODE END 4 */
 

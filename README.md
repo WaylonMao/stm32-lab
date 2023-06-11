@@ -4,18 +4,18 @@ This repository contains the source code and documentation for my STM32 developm
 learning purposes and is based on the STM32F103ZET6 microcontroller board, which is manufactured by ALIENTEK tech. co.,
 LTD. (Zhengdian atom).
 
-## Branch: 6-timer-delay
+## Branch: 7-timer-interrupt
 
-This project uses the timer to implement millisecond and microsecond delays.
+This project uses Timer to generate interrupt every 1 second. The LED on the board will blink every 1 second.
 
 ## Learning:
 
 - Timer Initialization
-- Counter
+- Interrupt
 
 ## Date and Version
 
-Date: 2023-06-09
+Date: 2023-06-11
 
 Version: 0.1
 
