@@ -4,18 +4,20 @@ This repository contains the source code and documentation for my STM32 developm
 learning purposes and is based on the STM32F103ZET6 microcontroller board, which is manufactured by ALIENTEK tech. co.,
 LTD. (Zhengdian atom).
 
-## Branch: 8-timer-pwm
+## Branch: 9-iwdg-test
 
-This project uses Timer to generate PWM signals. The PWM signals are used to control the blinking of the LED on the board. 
+This project is designed to test the independent watchdog (IWDG). I set the timeout period to 2 seconds. After running
+this project, you can use a serial monitor to observe the output of the program. Change the delay time to see the effect
+of the IWDG.
 
 ## Learning:
 
-- Timer Initialization
-- PWM
+- IWDG
+- UART
 
 ## Date and Version
 
-Date: 2023-06-11
+Date: 2023-06-12
 
 Version: 0.1
 
