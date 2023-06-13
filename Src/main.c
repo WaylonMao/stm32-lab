@@ -1,6 +1,6 @@
 /* USER CODE BEGIN Header */
 /**
- * @name           : 6-timer-delay
+ * @name           : 10-time-capture
  ******************************************************************************
  * @file           : main.c
  * @brief          : This is my project for learning STM32 development.
@@ -12,7 +12,7 @@
  *                   Debugger & Programmer: ST-Link V2
  *
  * @author         : Weilong Mao (https://github.com/WaylonMao)
- * @date           : 2023-06-09
+ * @date           : 2023-06-13
  * @version        : 0.1
  ******************************************************************************
  */
@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "LED_Driver/led.h"
 #include "SYSTEM/sys.h"
+#include "SYSTEM/usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,22 +43,25 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim5;
 
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+uint32_t start_time = 0;
+uint32_t end_time = 0;
+uint8_t cap_state = 0;
+uint16_t cap_val = 0;
+uint32_t overflow_count = 0;
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-// void SystemClock_Config(void);
+void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_TIM3_Init(void);
-static void MX_USART1_UART_Init(void);
+static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
-void delay_10ms(uint32_t);
-void delay_us(uint32_t);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -66,9 +70,9 @@ void delay_us(uint32_t);
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void) {
   /* USER CODE BEGIN 1 */
 
@@ -76,8 +80,7 @@ int main(void) {
 
   /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick.
-   */
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
   /* USER CODE BEGIN Init */
@@ -90,21 +93,36 @@ int main(void) {
   /* USER CODE BEGIN SysInit */
   sys_stm32_clock_init(RCC_PLL_MUL9);
   led_init();
+  usart_init(115200);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM3_Init();
-  MX_USART1_UART_Init();
+  MX_TIM5_Init();
+  HAL_TIM_IC_MspInit(&htim5);
   /* USER CODE BEGIN 2 */
-
+  uint32_t total_time = 0;
+  uint8_t count = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    LED1_TOGGLE();
-    delay_10ms(100);
+    if (cap_state & 0X80) {           // Get a complete capture.
+      LED1_TOGGLE();
+      total_time = cap_state & 0X3F;        // Get the times of overflows.
+      total_time *= 65536;                  // Calculate the total overflow time.
+      total_time += cap_val;                // Calculate the total time.
+      printf("Press Time: %d us\r\n", total_time); // Print the total time.
+      cap_state = 0;                  // Reset the capture state.
+    }
+    count++;
+    if (count > 20) {
+      count = 0;
+      LED0_TOGGLE();                  // Toggle the LED0 every 200ms.
+    }
+    HAL_Delay(10);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -152,143 +170,145 @@ int main(void) {
 // }
 
 /**
- * @brief TIM3 Initialization Function
- * @param None
- * @retval None
- */
-static void MX_TIM3_Init(void) {
+  * @brief TIM5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM5_Init(void) {
 
-  /* USER CODE BEGIN TIM3_Init 0 */
+  /* USER CODE BEGIN TIM5_Init 0 */
 
-  /* USER CODE END TIM3_Init 0 */
+  /* USER CODE END TIM5_Init 0 */
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
 
-  /* USER CODE BEGIN TIM3_Init 1 */
+  /* USER CODE BEGIN TIM5_Init 1 */
 
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 71;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_DOWN;
-  htim3.Init.Period = 1;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK) {
+  /* USER CODE END TIM5_Init 1 */
+  htim5.Instance = TIM5;
+  htim5.Init.Prescaler = 71;
+  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim5.Init.Period = 65535;
+  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim5) != HAL_OK) {
     Error_Handler();
   }
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK) {
+  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK) {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim5) != HAL_OK) {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK) {
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK) {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM3_Init 2 */
+  sConfigIC.ICPolarity = TIM_ICPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim5, &sConfigIC, TIM_CHANNEL_1) != HAL_OK) {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM5_Init 2 */
+  __HAL_TIM_ENABLE_IT(&htim5, TIM_IT_UPDATE);
+  HAL_TIM_IC_Start_IT(&htim5, TIM_CHANNEL_1);
+  /* USER CODE END TIM5_Init 2 */
 
-  /* USER CODE END TIM3_Init 2 */
 }
 
 /**
- * @brief USART1 Initialization Function
- * @param None
- * @retval None
- */
-static void MX_USART1_UART_Init(void) {
-
-  /* USER CODE BEGIN USART1_Init 0 */
-
-  /* USER CODE END USART1_Init 0 */
-
-  /* USER CODE BEGIN USART1_Init 1 */
-
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK) {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART1_Init 2 */
-
-  /* USER CODE END USART1_Init 2 */
-}
-
-/**
- * @brief GPIO Initialization Function
- * @param None
- * @retval None
- */
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_GPIO_Init(void) {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE BEGIN MX_GPIO_Init_1 */
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
-  /* USER CODE END MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
-  /*Configure GPIO pin : PE4 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+/* USER CODE BEGIN MX_GPIO_Init_2 */
 
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
-
-  /* USER CODE BEGIN MX_GPIO_Init_2 */
-  /*
-   * There are two LEDs on PB5 and PE5, both negative poles are connected to
-   * GPIO pins, and their positive poles are pulled up to 3.3V
-   */
-  GPIO_InitTypeDef gpio_init_struct;
-  gpio_init_struct.Pin = GPIO_PIN_5;
-  gpio_init_struct.Mode = GPIO_MODE_OUTPUT_PP;
-  gpio_init_struct.Pull = GPIO_PULLUP;
-  gpio_init_struct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &gpio_init_struct);
-  HAL_GPIO_Init(GPIOE, &gpio_init_struct);
-  /*
-   * Set the initial level of the two LEDs to high level,
-   * so that the two LEDs are off at the beginning.
-   */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_SET);
-  /* USER CODE END MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
-void delay_10ms(uint32_t ms) {
-  uint32_t i;
-  for (i = 0; i < ms; i++) {
-    delay_us(10000);
+void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim) {
+  if (htim->Instance == TIM5) {
+    GPIO_InitTypeDef gpio_init_struct;
+
+    gpio_init_struct.Pin = GPIO_PIN_0;
+    gpio_init_struct.Mode = GPIO_MODE_AF_PP;
+    gpio_init_struct.Pull = GPIO_PULLDOWN;
+    gpio_init_struct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOA, &gpio_init_struct);
+
+    HAL_NVIC_SetPriority(TIM5_IRQn, 1, 3);
+    HAL_NVIC_EnableIRQ(TIM5_IRQn);
   }
 }
 
-void delay_us(uint32_t us) {
-  uint16_t counter = us & 0xffff;
-  /* Set the initial value of the counter */
-  __HAL_TIM_SET_COUNTER(&htim3, counter);
-  /* Start the timer */
-  HAL_TIM_Base_Start(&htim3);
-  /* Wait for the timer to reach the set value */
-  while (counter > 0) {
-    counter = __HAL_TIM_GET_COUNTER(&htim3);
+void TIM5_IRQHandler(void) {
+  HAL_TIM_IRQHandler(&htim5);
+}
+
+/**
+ * @brief Callback function for TIM5.
+ * @param htim Handle of the timer.
+ */
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
+  if (htim->Instance == TIM5) {
+    if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
+      if ((cap_state & 0X80) == 0) {                                                // Haven't captured.
+        if (cap_state & 0X40) {                                                     // Captured the falling edge.
+          cap_state |= 0X80;                                                        // Mark captured.
+          cap_val = HAL_TIM_ReadCapturedValue(&htim5, TIM_CHANNEL_1);  // Get the value.
+          TIM_RESET_CAPTUREPOLARITY(&htim5, TIM_CHANNEL_1);                         // Clear the polarity.
+          TIM_SET_CAPTUREPOLARITY(&htim5, TIM_CHANNEL_1, TIM_ICPOLARITY_RISING);    // Set the polarity to rising edge.
+        } else {                                                                    // First capture.
+          cap_state = 0;
+          cap_val = 0;
+          cap_state |= 0X40;                                                // Mark the rising edge has been captured.
+          __HAL_TIM_DISABLE(&htim5);                                                // Disable the timer.
+          __HAL_TIM_SET_COUNTER(&htim5, 0);                                         // Clear the counter.
+          TIM_RESET_CAPTUREPOLARITY(&htim5, TIM_CHANNEL_1);                         // Clear the polarity.
+          TIM_SET_CAPTUREPOLARITY(&htim5, TIM_CHANNEL_1, TIM_ICPOLARITY_FALLING);   // Set the polarity to falling edge.
+          __HAL_TIM_ENABLE(&htim5);                                                 // Enable the timer.
+        }
+      }
+    }
   }
-  /* Stop the timer */
-  HAL_TIM_Base_Stop(&htim3);
+}
+
+/**
+ * @brief Callback function for timer overflow.
+ * @param htim Handle of the timer.
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+  if (htim->Instance == TIM5) {
+    if ((cap_state & 0X80) == 0) {                          // Haven't captured.
+      if (cap_state & 0X40) {                               // Captured the rising edge.
+        if ((cap_state & 0X3F) == 0X3F) {                   // Overflowed 63 times or more.
+          TIM_RESET_CAPTUREPOLARITY(&htim5, TIM_CHANNEL_1); // Clear the polarity.
+          TIM_SET_CAPTUREPOLARITY(&htim5, TIM_CHANNEL_1, TIM_ICPOLARITY_RISING);    // Set the polarity to rising edge.
+          cap_state |= 0X80;                                // Mark captured.
+          cap_val = 0XFFFF;
+        } else {
+          cap_state++;                                      // Increment the overflow counter.
+        }
+      }
+    }
+  }
 }
 /* USER CODE END 4 */
 

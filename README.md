@@ -4,18 +4,21 @@ This repository contains the source code and documentation for my STM32 developm
 learning purposes and is based on the STM32F103ZET6 microcontroller board, which is manufactured by ALIENTEK tech. co.,
 LTD. (Zhengdian atom).
 
-## Branch: 6-timer-delay
+## Branch: 10-time-capture
 
-This project uses the timer to implement millisecond and microsecond delays.
+This project uses the timer to capture the time of the rising edge and falling edge of the input signal.
+The timer is at the microsecond level, so overflow and counting are used to ensure that it can record around 4 seconds.
 
 ## Learning:
 
 - Timer Initialization
-- Counter
+- Timer Capture
+- Timer Interrupt
+- Timer Period Elapsed
 
 ## Date and Version
 
-Date: 2023-06-09
+Date: 2023-06-13
 
 Version: 0.1
 
